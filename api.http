@@ -1,0 +1,28 @@
+### 🔸 Создание события
+POST http://localhost:8080/api/v1/events
+Content-Type: application/json
+
+{
+  "name": "Реал - Барса",
+  "date": "2025-04-10",
+  "odds_win1": 1.5,
+  "odds_draw": 3.0,
+  "odds_win2": 2.0
+}
+
+### 🔹 Получить список событий
+GET http://localhost:8080/api/v1/events
+
+### 🎯 Сделать ставку
+POST http://localhost:8080/api/v1/bets
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "event_id": 1,
+  "amount": 100.0,
+  "outcome": "win1"
+}
+
+### 📄 Получить ставки пользователя
+GET http://localhost:8080/api/v1/bets/user/1
