@@ -31,7 +31,6 @@ func (h *BetHandler) CreateBet(c *gin.Context) {
 		return
 	}
 
-	// Логируем входящие данные
 	log.Printf("Создание ставки: user_id=%d, event_id=%d, amount=%.2f, outcome=%s", req.UserID, req.EventID, req.Amount, req.Outcome)
 
 	newBet, err := h.service.Create(req.UserID, req.EventID, req.Amount, req.Outcome)

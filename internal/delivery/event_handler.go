@@ -31,7 +31,6 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	// Логируем входящие данные
 	log.Printf("Создание события: name=%s, date=%s, odds_win1=%.2f, odds_draw=%.2f, odds_win2=%.2f", req.Name, req.Date, req.OddsWin1, req.OddsDraw, req.OddsWin2)
 
 	newEvent, err := h.service.Create(req.Name, req.Date, req.OddsWin1, req.OddsDraw, req.OddsWin2)

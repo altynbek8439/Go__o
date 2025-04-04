@@ -2,7 +2,7 @@ package services
 
 import (
 	"betting-site/internal/models"
-	"betting-site/internal/repository" // Убедись, что этот импорт есть
+	"betting-site/internal/repository"
 )
 
 type BetService struct {

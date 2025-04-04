@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Event struct {
 	gorm.Model
-	ID       uint    `json:"id"` // Добавляем поле ID с тегом json
+	ID       uint    `json:"id"`
 	Name     string  `json:"name"`
 	Date     string  `json:"date"`
 	OddsWin1 float32 `json:"odds_win1"`
