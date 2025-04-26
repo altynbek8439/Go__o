@@ -1,41 +1,46 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import api from '../api';
 
 const BetList = () => {
-    const [userId, setUserId] = useState('');
+    const { user } = useContext(AuthContext);
     const [bets, setBets] = useState([]);
+    const [error, setError] = useState('');
 
     const fetchBets = async () => {
-        if (!userId) {
-            alert('Введите ID пользователя');
+        if (!user) {
+            setError('Пожалуйста, войдите в систему');
             return;
         }
 
         try {
-            const response = await axios.get(`http://localhost:8080/api/v1/bets/user/${userId}`);
+            setError('');
+            const response = await api.get(`/bets/user/${user.id}`);
             console.log('Полученные ставки:', response.data);
             setBets(response.data);
         } catch (error) {
-            console.error('Ошибка при загрузке ставок:', error);
+            setError('Ошибка при загрузке ставок: ' + (error.response?.data?.error || error.message));
         }
     };
 
+    if (!user) {
+        return <p>Пожалуйста, войдите в систему, чтобы просмотреть свои ставки.</p>;
+    }
+
     return (
         <div>
-            <h2>Ставки пользователя</h2>
-            <input
-                type="number"
-                placeholder="ID пользователя"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-            />
-            <button onClick={fetchBets}>Показать ставки</button>
+            <h2>Ваши ставки (Пользователь: {user.username})</h2>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <button onClick={fetchBets}>Показать мои ставки</button>
             <div>
-                {bets.map(bet => (
+                {bets.map((bet) => (
                     <div key={bet.id} className="bet">
-                        ID ставки: {bet.id}<br />
-                        ID события: {bet.event_id}<br />
-                        Сумма: {bet.amount.toFixed(2)}<br />
+                        ID ставки: {bet.id}
+                        <br />
+                        ID события: {bet.event_id}
+                        <br />
+                        Сумма: {bet.amount.toFixed(2)}
+                        <br />
                         Исход: {bet.outcome}
                     </div>
                 ))}

@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import api from '../api';
 
 const CreateBet = () => {
-    const [userId, setUserId] = useState('');
+    const { user, refreshUser } = useContext(AuthContext);
     const [eventId, setEventId] = useState('');
     const [amount, setAmount] = useState('');
     const [outcome, setOutcome] = useState('win1');
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Отправка ставки:', { user_id: parseInt(userId), event_id: parseInt(eventId), amount: parseFloat(amount), outcome });
+        if (!user) {
+            setError('Пожалуйста, войдите в систему');
+            return;
+        }
 
         try {
-            const response = await axios.post('http://localhost:8080/api/v1/bets', {
-                user_id: parseInt(userId),
+            setError('');
+            const response = await api.post('/bets', {
                 event_id: parseInt(eventId),
                 amount: parseFloat(amount),
                 outcome,
@@ -21,27 +26,25 @@ const CreateBet = () => {
 
             if (response.status === 201) {
                 alert('Ставка успешно сделана!');
-                setUserId('');
+                await refreshUser(); // Обновляем данные пользователя (баланс)
                 setEventId('');
                 setAmount('');
                 setOutcome('win1');
             }
         } catch (error) {
-            console.error('Ошибка при создании ставки:', error);
+            setError('Ошибка при создании ставки: ' + (error.response?.data?.error || error.message));
         }
     };
 
+    if (!user) {
+        return <p>Пожалуйста, войдите в систему, чтобы сделать ставку.</p>;
+    }
+
     return (
         <div>
-            <h2>Сделать ставку</h2>
+            <h2>Сделать ставку (Пользователь: {user.username})</h2>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
             <form onSubmit={handleSubmit}>
-                <input
-                    type="number"
-                    placeholder="ID пользователя"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                    required
-                />
                 <input
                     type="number"
                     placeholder="ID события"

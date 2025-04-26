@@ -1,9 +1,11 @@
 package delivery
 
 import (
+	"betting-site/internal/models"
 	"betting-site/internal/services"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,4 +52,41 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, events)
+}
+
+func (h *EventHandler) UpdateEvent(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	var eventEdit models.EventEdit
+	if err := c.ShouldBindJSON(&eventEdit); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	updatedEvent, err := h.service.Update(id, &eventEdit)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedEvent)
+}
+
+func (h *EventHandler) DeleteEvent(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	if err := h.service.Delete(id); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully"})
 }

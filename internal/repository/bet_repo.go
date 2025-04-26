@@ -23,3 +23,13 @@ func (r *BetRepository) GetBetsByUserID(userID int) ([]models.Bet, error) {
 	err := r.db.Where("user_id = ?", userID).Find(&bets).Error
 	return bets, err
 }
+
+func (r *BetRepository) GetByID(id int) (*models.Bet, error) {
+	var bet models.Bet
+	err := r.db.First(&bet, id).Error
+	return &bet, err
+}
+
+func (r *BetRepository) Delete(betID int) error {
+	return r.db.Delete(&models.Bet{}, betID).Error
+}

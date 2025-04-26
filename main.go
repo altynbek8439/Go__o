@@ -1,28 +1,35 @@
 package main
 
 import (
-	"betting-site/internal/models"
+	"betting-site/internal/db"
 	"betting-site/routes"
 	"log"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
-	dsn := "host=localhost user=postgres password=9801042 dbname=betting_site port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Error connecting to the database:", err)
-	}
+	db.InitDB()
 
-	err = db.AutoMigrate(&models.Event{}, &models.Bet{}, &models.User{})
+	// Применение миграций
+	m, err := migrate.New(
+		"file://C:/Users/temir/betting-site/internal/db/migrations",
+		"postgres://postgres:9801042@localhost:5432/betting_site1?sslmode=disable&search_path=public",
+	)
 	if err != nil {
-		log.Fatal("Error on migrating to the DB", err)
+		log.Fatalf("migration failed: %v", err)
 	}
+	log.Println("Applying migrations...")
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("migration failed: %v", err)
+	}
+	log.Println("Migrations applied successfully")
 
+	// Настройка Gin
 	r := gin.Default()
 
 	r.Use(func(c *gin.Context) {
@@ -32,13 +39,12 @@ func main() {
 	})
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Content-Type"},
-		AllowCredentials: true,
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders: []string{"Content-Type", "Authorization"}, // Добавляем Authorization
 	}))
 
-	routes.SetupRoutes(r, db)
+	routes.SetupRoutes(r, db.DB)
 
 	r.Run(":8080")
 }

@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import api from '../api';
 
 const CreateEvent = ({ onEventCreated }) => {
+    const { user } = useContext(AuthContext);
     const [name, setName] = useState('');
     const [date, setDate] = useState('');
     const [oddsWin1, setOddsWin1] = useState('');
     const [oddsDraw, setOddsDraw] = useState('');
     const [oddsWin2, setOddsWin2] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!user) {
+            setError('Пожалуйста, войдите в систему');
+            return;
+        }
 
         try {
-            const response = await axios.post('http://localhost:8080/api/v1/events', {
+            setError('');
+            const response = await api.post('/events', {
                 name,
                 date,
                 odds_win1: parseFloat(oddsWin1),
@@ -29,13 +37,18 @@ const CreateEvent = ({ onEventCreated }) => {
                 setOddsWin2('');
             }
         } catch (error) {
-            console.error('Ошибка при создании события:', error);
+            setError('Ошибка при создании события: ' + (error.response?.data?.error || error.message));
         }
     };
 
+    if (!user) {
+        return <p>Пожалуйста, войдите в систему, чтобы добавить событие.</p>;
+    }
+
     return (
         <div>
-            <h2>Добавить событие</h2>
+            <h2>Добавить событие (Пользователь: {user.username})</h2>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"

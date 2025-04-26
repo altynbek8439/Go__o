@@ -23,3 +23,17 @@ func (r *EventRepository) GetAll() ([]models.Event, error) {
 	err := r.db.Find(&events).Error
 	return events, err
 }
+
+func (r *EventRepository) GetByID(id int) (*models.Event, error) {
+	var event models.Event
+	err := r.db.First(&event, id).Error
+	return &event, err
+}
+
+func (r *EventRepository) Update(id int, eventEdit *models.EventEdit) error {
+	return r.db.Model(&models.Event{}).Where("id = ?", id).Omit("id, CreatedAt").Updates(eventEdit).Error
+}
+
+func (r *EventRepository) Delete(eventID int) error {
+	return r.db.Delete(&models.Event{}, eventID).Error
+}

@@ -1,0 +1,34 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    balance FLOAT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    odds_win1 FLOAT NOT NULL,
+    odds_draw FLOAT NOT NULL,
+    odds_win2 FLOAT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+
+CREATE TABLE bets (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    event_id INTEGER NOT NULL,
+    amount FLOAT NOT NULL,
+    outcome TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (event_id) REFERENCES events(id)
+);
